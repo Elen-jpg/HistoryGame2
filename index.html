@@ -1,0 +1,708 @@
+
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ისტორიის ქვიზ-პორტალი / History Quiz Portal</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #e74c3c;
+            --accent: #f39c12;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.2rem;
+        }
+
+        /* ენის გადამრთველი */
+        .lang-switch {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .lang-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.4);
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .lang-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* ნავიგაცია */
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .nav-tab-btn {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: 0.3s;
+        }
+
+        .nav-tab-btn:hover, .nav-tab-btn.active {
+            background-color: var(--accent);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 30px auto;
+            flex: 1;
+        }
+
+        .section {
+            display: none;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* ქვიზის სექცია */
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .topic-card {
+            background: var(--bg);
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .topic-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .topic-badge {
+            background: var(--primary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        #quiz-game {
+            display: none;
+        }
+
+        .quiz-header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #edf2f7;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .timer-box {
+            color: #e74c3c;
+            font-size: 1.1rem;
+        }
+
+        .question-box {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .opt-btn {
+            background: #edf2f7;
+            border: 1px solid #cbd5e0;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .opt-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .opt-btn.correct { background: #48bb78 !important; color: white; }
+        .opt-btn.wrong { background: #f56565 !important; color: white; }
+
+        .quiz-controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--accent);
+        }
+
+        .back-btn {
+            background: #718096;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* ბორბალის სექცია */
+        .wheel-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 35px solid #e74c3c;
+            z-index: 10;
+            filter: drop-shadow(0px 3px 2px rgba(0,0,0,0.3));
+        }
+
+        .wheel-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            text-align: center;
+        }
+
+        #wheel-canvas {
+            border: 7px solid var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            background: white;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .spin-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 15px 45px;
+            font-size: 1.25rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+        }
+
+        .spin-btn:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 id="main-title">🏛️ ისტორიის ქვიზ-პორტალი</h1>
+        
+        <div class="lang-switch">
+            <button class="lang-btn active" id="btn-ka" onclick="changeLang('ka')">GE</button>
+            <button class="lang-btn" id="btn-en" onclick="changeLang('en')">EN</button>
+        </div>
+
+        <nav>
+            <button class="nav-tab-btn active" id="nav-quiz-tab" onclick="switchTab('quiz')">🎯 ქვიზები</button>
+            <button class="nav-tab-btn" id="nav-wheel-tab" onclick="switchTab('wheel')">🎡 ბორბალი</button>
+        </nav>
+    </header>
+
+    <div class="container">
+
+        <!-- ================= ქვიზების სექცია ================= -->
+        <div id="quiz-section" class="section active">
+            <div id="quiz-menu">
+                <h2 id="select-topic-text">აირჩიეთ ისტორიული თემა:</h2>
+                <div class="topic-grid" id="topics-container"></div>
+            </div>
+
+            <div id="quiz-game">
+                <div class="quiz-header-info">
+                    <button class="back-btn" onclick="exitQuiz()" id="back-menu-btn">⬅️ მენიუში დაბრუნება</button>
+                    <span id="quiz-progress">კითხვა 1 / 10</span>
+                    <div class="timer-box" id="timer-box-elem" style="display:none;">⏱️ <span id="time-left-label">დრო</span>: <span id="time-left">10:00</span></div>
+                </div>
+                
+                <div class="question-box" id="q-text">კითხვა იტვირთება...</div>
+                <div class="options-grid" id="opts-container"></div>
+                
+                <div class="quiz-controls">
+                    <span></span>
+                    <button id="next-btn" class="nav-btn" style="display:none;" onclick="nextQuestion()">შემდეგი ➡️</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= ბორბალის სექცია ================= -->
+        <div id="wheel-section" class="section">
+            <div class="wheel-container">
+                <h2 id="wheel-heading">🎡 ისტორიული ბედის ბორბალი</h2>
+                <p id="wheel-desc">დაატრიალეთ ბორბალი და ავტომატურად შეგირჩევთ თემას 10-წუთიანი ქვიზისთვის!</p>
+                
+                <div class="wheel-wrapper">
+                    <div class="wheel-pointer"></div>
+                    <canvas id="wheel-canvas" width="700" height="700"></canvas>
+                </div>
+
+                <button class="spin-btn" id="spin-btn-text" onclick="spinWheel()">დაატრიალე!</button>
+                <h3 id="wheel-result" style="margin-top: 15px; color: var(--primary); min-height: 30px;"></h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- კითხვების მონაცემთა ბაზა -->
+    <script src="questions.js"></script>
+
+    <!-- მთავარი სკრიპტები -->
+    <script>
+        let currentLang = 'ka';
+        let currentTopic = [];
+        let qIndex = 0;
+        let score = 0;
+        let currentOptions = [];
+        let correctOptionIndex = 0;
+        let timerInterval = null;
+        let timeLeftSeconds = 600;
+        let isWheelQuiz = false;
+
+        const topicIcons = {
+            georgia: "🇬🇪",
+            egypt_meso: "🏺",
+            greece: "🏛️",
+            rome: "🏛️",
+            crusades: "🛡️",
+            islam_expansion: "☪️",
+            mongols: "🐎",
+            religious_wars: "⚔️",
+            ww1: "🪖",
+            ww2: "🎖️",
+            modern_history: "🗽",
+            archaeology: "⛏️"
+        };
+
+        const topicNames = {
+            ka: {
+                georgia: "საქართველოს ისტორია",
+                egypt_meso: "ეგვიპტე და შუამდინარეთი",
+                greece: "ძველი საბერძნეთი",
+                rome: "ძველი რომი",
+                crusades: "ჯვაროსნული ომები",
+                islam_expansion: "ისლამი და არაბთა დაპყრობები",
+                mongols: "მონღოლთა იმპერია",
+                religious_wars: "რელიგიური ომები ევროპაში",
+                ww1: "I მსოფლიო ომი",
+                ww2: "II მსოფლიო ომი",
+                modern_history: "ევროპა-ამერიკის თანამედროვე ისტორია",
+                archaeology: "არქეოლოგია"
+            },
+            en: {
+                georgia: "History of Georgia",
+                egypt_meso: "Egypt & Mesopotamia",
+                greece: "Ancient Greece",
+                rome: "Ancient Rome",
+                crusades: "The Crusades",
+                islam_expansion: "Islam & Arab Conquests",
+                mongols: "Mongol Empire",
+                religious_wars: "Religious Wars in Europe",
+                ww1: "World War I",
+                ww2: "World War II",
+                modern_history: "Modern History of Europe & America",
+                archaeology: "Archaeology"
+            }
+        };
+
+        const wheelTopicsKeys = Object.keys(topicNames.ka);
+
+        function changeLang(lang) {
+            currentLang = lang;
+            document.getElementById('btn-ka').classList.toggle('active', lang === 'ka');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+
+            if (lang === 'en') {
+                document.getElementById('main-title').innerText = "🏛️ History Quiz Portal";
+                document.getElementById('nav-quiz-tab').innerText = "🎯 Quizzes";
+                document.getElementById('nav-wheel-tab').innerText = "🎡 Wheel";
+                document.getElementById('select-topic-text').innerText = "Select a History Topic:";
+                document.getElementById('back-menu-btn').innerText = "⬅️ Back to Menu";
+                document.getElementById('wheel-heading').innerText = "🎡 Wheel of History";
+                document.getElementById('wheel-desc').innerText = "Spin the wheel to get a topic for a 10-minute timed quiz!";
+                document.getElementById('spin-btn-text').innerText = "Spin!";
+                document.getElementById('time-left-label').innerText = "Time left";
+            } else {
+                document.getElementById('main-title').innerText = "🏛️ ისტორიის ქვიზ-პორტალი";
+                document.getElementById('nav-quiz-tab').innerText = "🎯 ქვიზები";
+                document.getElementById('nav-wheel-tab').innerText = "🎡 ბორბალი";
+                document.getElementById('select-topic-text').innerText = "აირჩიეთ ისტორიული თემა:";
+                document.getElementById('back-menu-btn').innerText = "⬅️ მენიუში დაბრუნება";
+                document.getElementById('wheel-heading').innerText = "🎡 ისტორიული ბედის ბორბალი";
+                document.getElementById('wheel-desc').innerText = "დაატრიალეთ ბორბალი და ავტომატურად შეგირჩევთ თემას 10-წუთიანი ქვიზისთვის!";
+                document.getElementById('spin-btn-text').innerText = "დაატრიალე!";
+                document.getElementById('time-left-label').innerText = "დრო";
+            }
+
+            renderTopicsGrid();
+            drawWheel();
+        }
+
+        function renderTopicsGrid() {
+            const container = document.getElementById('topics-container');
+            container.innerHTML = '';
+
+            for (const key of wheelTopicsKeys) {
+                const card = document.createElement('div');
+                card.className = 'topic-card';
+                card.onclick = () => startQuiz(key, false);
+                const icon = topicIcons[key] || "📜";
+                card.innerHTML = `
+                    <span>${icon} ${topicNames[currentLang][key]}</span>
+                    <span class="topic-badge">${currentLang === 'en' ? 'All Questions' : 'ყველა კითხვა'}</span>
+                `;
+                container.appendChild(card);
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+
+            if (tab === 'quiz') {
+                document.getElementById('quiz-section').classList.add('active');
+                document.getElementById('nav-quiz-tab').classList.add('active');
+            } else {
+                document.getElementById('wheel-section').classList.add('active');
+                document.getElementById('nav-wheel-tab').classList.add('active');
+            }
+        }
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function startQuiz(topicKey, fromWheel = false) {
+            let keyToUse = topicKey;
+            if (!window.quizBank[currentLang][keyToUse]) {
+                keyToUse = 'georgia'; // Fallback
+            }
+
+            let allQuestions = window.quizBank[currentLang][keyToUse];
+            
+            isWheelQuiz = fromWheel;
+
+            if (isWheelQuiz) {
+                currentTopic = shuffleArray(allQuestions).slice(0, 10);
+                document.getElementById('timer-box-elem').style.display = 'block';
+                timeLeftSeconds = 600;
+                startTimer();
+            } else {
+                currentTopic = allQuestions;
+                document.getElementById('timer-box-elem').style.display = 'none';
+                clearInterval(timerInterval);
+            }
+
+            qIndex = 0;
+            score = 0;
+
+            document.getElementById('quiz-menu').style.display = 'none';
+            document.getElementById('quiz-game').style.display = 'block';
+            
+            showQuestion();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeftSeconds--;
+                updateTimerDisplay();
+                
+                if (timeLeftSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    alert(currentLang === 'en' ? "Time is up! Quiz finished." : "⏰ დრო ამოიწურა! ქვიზი დასრულდა.");
+                    exitQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeftSeconds / 60);
+            const seconds = timeLeftSeconds % 60;
+            document.getElementById('time-left').innerText = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function showQuestion() {
+            const q = currentTopic[qIndex];
+            document.getElementById('q-text').innerText = (qIndex + 1) + ". " + q.q;
+            document.getElementById('quiz-progress').innerText = `${currentLang === 'en' ? 'Question' : 'კითხვა'} ${qIndex + 1} / ${currentTopic.length}`;
+            document.getElementById('next-btn').style.display = 'none';
+
+            let optionsWithFlag = q.opts.map((opt, idx) => {
+                return { text: opt, isCorrect: (idx === q.c) };
+            });
+
+            optionsWithFlag.sort(() => Math.random() - 0.5);
+            currentOptions = optionsWithFlag;
+
+            const container = document.getElementById('opts-container');
+            container.innerHTML = '';
+
+            currentOptions.forEach((item, idx) => {
+                if (item.isCorrect) {
+                    correctOptionIndex = idx;
+                }
+
+                const btn = document.createElement('button');
+                btn.className = 'opt-btn';
+                btn.innerText = item.text;
+                btn.onclick = () => selectAnswer(btn, idx);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectAnswer(btn, selectedIdx) {
+            const allBtns = document.querySelectorAll('.opt-btn');
+            allBtns.forEach(b => b.disabled = true);
+
+            if (selectedIdx === correctOptionIndex) {
+                btn.classList.add('correct');
+                score++;
+            } else {
+                btn.classList.add('wrong');
+                allBtns[correctOptionIndex].classList.add('correct');
+            }
+
+            document.getElementById('next-btn').style.display = 'inline-block';
+        }
+
+        function nextQuestion() {
+            qIndex++;
+            if (qIndex < currentTopic.length) {
+                showQuestion();
+            } else {
+                clearInterval(timerInterval);
+                const msg = currentLang === 'en' 
+                    ? `🎉 Quiz finished! Your score: ${score} / ${currentTopic.length}` 
+                    : `🎉 ქვიზი დასრულდა! შენი შედეგი: ${score} / ${currentTopic.length}`;
+                alert(msg);
+                exitQuiz();
+            }
+        }
+
+        function exitQuiz() {
+            clearInterval(timerInterval);
+            document.getElementById('quiz-game').style.display = 'none';
+            document.getElementById('quiz-menu').style.display = 'block';
+        }
+
+        // ================= ბორბლის ლოგიკა =================
+        const canvas = document.getElementById('wheel-canvas');
+        const ctx = canvas.getContext('2d');
+        let currentAngle = 0;
+        let isSpinning = false;
+
+        function drawWheel() {
+            const numTopics = wheelTopicsKeys.length;
+            const arc = Math.PI * 2 / numTopics;
+            const colors = ['#f39c12', '#e74c3c', '#9b59b6', '#3498db', '#2ecc71', '#1abc9c', '#e67e22', '#34495e', '#e84393', '#00b894', '#0984e3', '#fdcb6e'];
+
+            const center = canvas.width / 2; // 350px
+            const radius = center - 15;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < numTopics; i++) {
+                const angle = currentAngle + i * arc;
+                
+                // დანაყოფის დახატვა
+                ctx.beginPath();
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.moveTo(center, center);
+                ctx.arc(center, center, radius, angle, angle + arc);
+                ctx.fill();
+                ctx.strokeStyle = "white";
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // რადიალური ტექსტი - იწერება ცენტრიდან გარეთ მიმართულებით
+                ctx.save();
+                ctx.fillStyle = "white";
+                ctx.font = "bold 13px Arial";
+                
+                const midAngle = angle + arc / 2;
+                ctx.translate(center, center);
+                ctx.rotate(midAngle);
+                ctx.textAlign = "right";
+                
+                const icon = topicIcons[wheelTopicsKeys[i]] || "📜";
+                let text = icon + " " + topicNames[currentLang][wheelTopicsKeys[i]];
+                
+                // ტექსტი განთავსებულია რადიუსის ბოლოდან 20px-ით შიგნით
+                ctx.fillText(text, radius - 20, 5);
+                ctx.restore();
+            }
+
+            // ცენტრალური წრე
+            ctx.beginPath();
+            ctx.fillStyle = "#2c3e50";
+            ctx.arc(center, center, 30, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            isSpinning = true;
+            document.getElementById('wheel-result').innerText = '';
+
+            const spinRounds = 5 + Math.floor(Math.random() * 5);
+            const randomOffset = Math.random() * Math.PI * 2;
+            const totalRotation = spinRounds * Math.PI * 2 + randomOffset;
+
+            let start = null;
+            const duration = 4000;
+            const initialAngle = currentAngle;
+
+            function animateWheel(timestamp) {
+                if (!start) start = timestamp;
+                const progress = (timestamp - start) / duration;
+
+                if (progress < 1) {
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    currentAngle = initialAngle + totalRotation * easeOut;
+                    drawWheel();
+                    requestAnimationFrame(animateWheel);
+                } else {
+                    currentAngle = (initialAngle + totalRotation) % (Math.PI * 2);
+                    drawWheel();
+                    isSpinning = false;
+                    getSelectedTopic();
+                }
+            }
+
+            requestAnimationFrame(animateWheel);
+        }
+
+        function getSelectedTopic() {
+            const numTopics = wheelTopicsKeys.length;
+            const arc = Math.PI * 2 / numTopics;
+
+            let effectiveAngle = (Math.PI * 1.5 - currentAngle) % (Math.PI * 2);
+            if (effectiveAngle < 0) effectiveAngle += Math.PI * 2;
+
+            const selectedIndex = Math.floor(effectiveAngle / arc) % numTopics;
+            const selectedKey = wheelTopicsKeys[selectedIndex];
+            const icon = topicIcons[selectedKey] || "📜";
+            const selectedName = icon + " " + topicNames[currentLang][selectedKey];
+
+            const resText = currentLang === 'en' ? "🎯 Selected: " + selectedName : "🎯 ამორჩეული თემაა: " + selectedName;
+            document.getElementById('wheel-result').innerText = resText;
+
+            setTimeout(() => {
+                switchTab('quiz');
+                startQuiz(selectedKey, true);
+            }, 1600);
+        }
+
+        renderTopicsGrid();
+        drawWheel();
+    </script>
+</body>
+</html>
